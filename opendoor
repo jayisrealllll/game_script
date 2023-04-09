@@ -1,0 +1,28 @@
+local door = script.Parent -- assumes the script is placed in the door model
+local isOpen = false
+local openPosition = door.CFrame * CFrame.new(0,0,-1) -- position to move to when opening
+local closePosition = door.CFrame -- position to move to when closing
+local doorSpeed = 2 -- speed at which the door opens and closes
+
+function onTouched(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        if not isOpen then
+            isOpen = true
+            door.CanCollide = false
+            local tween = game:GetService("TweenService"):Create(door, TweenInfo.new(doorSpeed), {CFrame = openPosition})
+            tween:Play()
+            wait(doorSpeed)
+            door.CanCollide = true
+        else
+            isOpen = false
+            door.CanCollide = false
+            local tween = game:GetService("TweenService"):Create(door, TweenInfo.new(doorSpeed), {CFrame = closePosition})
+            tween:Play()
+            wait(doorSpeed)
+            door.CanCollide = true
+        end
+    end
+end
+
+door.Touched:Connect(onTouched)
