@@ -1,0 +1,52 @@
+-- Define variables
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local camera = Workspace.CurrentCamera
+
+-- Create UI elements
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = player.PlayerGui
+
+local Crosshair = Instance.new("Frame")
+Crosshair.Size = UDim2.new(0, 16, 0, 16)
+Crosshair.Position = UDim2.new(0.5, -8, 0.5, -8)
+Crosshair.BackgroundColor3 = Color3.new(1, 1, 1)
+Crosshair.BorderSizePixel = 0
+Crosshair.Parent = ScreenGui
+
+-- Define functions
+local function onCharacterAdded(newCharacter)
+    character = newCharacter
+end
+
+local function onPlayerRespawned()
+    if character then
+        character:WaitForChild("HumanoidRootPart").CFrame = Workspace.SpawnLocation.CFrame
+    end
+end
+
+local function onInputBegan(input, gameProcessed)
+    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        ReplicatedStorage.RemoteEvents:FindFirstChild("Fire"):FireServer()
+    end
+end
+
+-- Bind events
+player.CharacterAdded:Connect(onCharacterAdded)
+Players.PlayerAdded:Connect(function(newPlayer)
+    newPlayer.CharacterAdded:Connect(onCharacterAdded)
+end)
+player.CharacterAdded:Connect(onPlayerRespawned)
+Players.PlayerSpawned:Connect(onPlayerRespawned)
+camera.CameraType = Enum.CameraType.Scriptable
+RunService.RenderStepped:Connect(function()
+    Crosshair.Visible = not StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.All)
+    Crosshair.Position = UDim2.new(0.5, -8, 0.5, -8)
+end)
+UserInputService.InputBegan:Connect(onInputBegan)
